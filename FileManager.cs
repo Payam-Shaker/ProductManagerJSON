@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Text;
@@ -31,7 +32,10 @@ namespace ProductManager
                 File.Create(jsonPath);
             }
             //AddCatagory();v  
-            AddProduct();
+            //AddProduct();
+            //DeleteProduct();
+            //UpdateProduct();
+            ReadAllProduct();
         }
 
         public void AddProduct()
@@ -72,7 +76,100 @@ namespace ProductManager
 
         }
 
+        public void DeleteProduct()
+        {
 
+            Console.WriteLine("To which category wish you delete the product? ");
+            string userChoi = Console.ReadLine();
+
+            try
+            {
+                var jsonfile = File.ReadAllText(jsonPath);
+                var jsonobject = JObject.Parse(jsonfile);
+                JArray chosenCatArr = (JArray)jsonobject[userChoi];
+                Console.WriteLine("To delete Enter Product ID: ");
+                int prodID = Convert.ToInt32(Console.ReadLine());
+                if (prodID > 0 )
+                {
+                    var toBeDeletedProd = chosenCatArr.FirstOrDefault(p => p["ID"].Value<int>() == prodID);
+                    chosenCatArr.Remove(toBeDeletedProd);
+                string newJsonResult = Newtonsoft.Json.JsonConvert.SerializeObject(jsonobject, Newtonsoft.Json.Formatting.Indented);
+                File.WriteAllText(jsonPath, newJsonResult);
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+                Console.WriteLine(" Delete operation has Faild!", ex.StackTrace);
+            }
+        }
+
+        public void UpdateProduct()
+        {
+            Console.WriteLine("To which category wish you update the product? ");
+            string userChoi = Console.ReadLine();
+            try
+            {
+                var jsonfile = File.ReadAllText(jsonPath);
+                var jsonobject = JObject.Parse(jsonfile);
+                JArray chosenCatArr = (JArray)jsonobject[userChoi];
+                Console.WriteLine("To update Enter Product ID: ");
+                int prodID = Convert.ToInt32(Console.ReadLine());
+                if (prodID > 0)
+                {
+                    Console.WriteLine("Enter new product name: ");
+                    string newName = Console.ReadLine();
+                    var toBeUpdateProd = chosenCatArr.Where(p => p["ID"].Value<int>() == prodID);
+                    foreach (var product in toBeUpdateProd)
+                    {
+                        product["Name"] = !string.IsNullOrEmpty(newName) ? newName : string.Empty;
+                    }
+                    jsonobject[userChoi] = chosenCatArr;
+                    string newJsonResult = Newtonsoft.Json.JsonConvert.SerializeObject(jsonobject, Newtonsoft.Json.Formatting.Indented);
+                    File.WriteAllText(jsonPath, newJsonResult);
+
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+
+        }
+
+        public void ReadAllProduct()
+        {
+            Console.WriteLine("Product(s) of which category wish you to print? ");
+
+
+            Console.WriteLine("1    - Women");
+            Console.WriteLine("2    - Men");
+            Console.WriteLine("3    - Barn");
+            string userChoi = Console.ReadLine();
+            try
+            {
+                var jsonfile = File.ReadAllText(jsonPath);
+                var jsonobject = JObject.Parse(jsonfile);
+                JArray chosenCatArr = (JArray)jsonobject[userChoi];
+                Console.WriteLine("All the product under the category {0}", userChoi);
+                if (chosenCatArr != null)
+                {
+                    foreach (var item in chosenCatArr)
+                    {
+                        Console.WriteLine("-" + item["ID"] + "\t" + item["Name"].ToString());
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
 
         public void AddCatagory()
         {
