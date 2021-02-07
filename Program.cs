@@ -6,7 +6,9 @@ namespace ProductManager
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            FileManager fm = new();
+            fm.Run();
+
         }
     }
 }
